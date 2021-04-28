@@ -13,7 +13,10 @@ module.exports = {
             throw err;
         }
     },
-    createImage: async args => {
+    createImage: async (args, req) => {
+        if(!req.isAuth){
+            throw new Error('Not Authenticated!')
+        }
         try {
             const image = new Image({
                 name: args.imageInput.name,

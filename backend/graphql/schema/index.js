@@ -10,6 +10,12 @@ type Image {
     creator: User!
 }
 
+type AuthData {
+    userID : ID!
+    token : String!
+    tokenExpiration: Int!
+}
+
 type User {
     _id : ID!
     email: String!
@@ -31,6 +37,7 @@ input ImageInput {
 
 type RootQuery {
     images : [Image!]!
+    login(email: String!, password: String!) : AuthData
 }
 
 type RootMutation {
