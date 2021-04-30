@@ -3,11 +3,12 @@ const Image = require('../../models/Image');
 const User = require('../../models/users');
 const { dateToString } = require('../../helpers/date');
 
-const transformImage = image => {
+const transformImage = img => {
     return {
-        ...image._doc,
-        date: dateToString(image._doc.date),
-        creator: user.bind(this, image.creator)
+        ...img._doc,
+        _id: img.id,
+        date: dateToString(img._doc.date),
+        creator: user.bind(this, img.creator)
     };
 };
 

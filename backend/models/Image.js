@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { schema } = require('./users');
 
 const Schema = mongoose.Schema;
 
@@ -10,7 +9,7 @@ const imageSchema = new Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     price: {
         type: Number,

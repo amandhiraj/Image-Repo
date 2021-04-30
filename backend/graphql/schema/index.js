@@ -37,12 +37,13 @@ input ImageInput {
 
 type RootQuery {
     images : [Image!]!
-    login(email: String!, password: String!) : AuthData
+    login(email: String!, password: String!) : AuthData!
 }
 
 type RootMutation {
     createImage(imageInput : ImageInput): Image
     createUser(userInput : UserInput) : User
+    deleteImage(deleteImageId : ID!) : Image!
 }
 
 schema {
