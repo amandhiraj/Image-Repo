@@ -1,7 +1,11 @@
 const Image = require('../../models/Image');
 const User = require('../../models/users');
 const { transformImage } = require('./merge')
+const aws = require('aws-sdk');
 
+const ID = 'AKIAXQCKFQN3ZCBEQNUB';
+const SECRET = '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';
+const BUCKET_NAME = 'shopify-challenge-aman';
 module.exports = {
     images: async () => {
         try {
@@ -52,5 +56,31 @@ module.exports = {
         } catch (error) {
             throw error;
         }
-    }
+    },
+    signS3: async (filename, filetype) => {
+        // AWS_ACCESS_KEY_ID
+        // AWS_SECRET_ACCESS_KEY
+        const s3 = new aws.S3({
+            accessKeyId: ID,
+            secretAccessKey: SECRET,
+            signatureVersion: 'v4',
+            region: 'ca-central-1',
+        });
+
+        const s3Params = {
+            Bucket: BUCKET_NAME,
+            Key: filename,
+            Expires: 120,
+            ContentType: filetype,
+            ACL: 'public-read',
+        };
+
+        const signedRequest = await s3.getSignedUrl('putObject', s3Params);
+        const url = `https://${s3Bucket}.s3.amazonaws.com/${filename}`;
+
+        return {
+            signedRequest,
+            url,
+        };
+    },
 }

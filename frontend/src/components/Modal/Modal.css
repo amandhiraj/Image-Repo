@@ -1,6 +1,6 @@
 .modal {
     width: 90%;
-    background: white;
+    background: rgb(199, 199, 199);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
     position: fixed;
     top: 10vh;
@@ -9,7 +9,7 @@
   
   .modal__header {
     padding: 1rem;
-    background: #5101d1;
+    background: #353535;
     color: white;
   }
   

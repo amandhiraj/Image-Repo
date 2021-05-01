@@ -23,6 +23,10 @@ type User {
     createdImages : [Image!]
 }
 
+type S3Payload {
+    signedRequest : String!,
+    url : String!
+}
 input UserInput {
     email: String!
     password: String
@@ -44,6 +48,7 @@ type RootMutation {
     createImage(imageInput : ImageInput): Image
     createUser(userInput : UserInput) : User
     deleteImage(deleteImageId : ID!) : Image!
+    signS3(filename : String!, filetype : String!) : S3Payload!
 }
 
 schema {

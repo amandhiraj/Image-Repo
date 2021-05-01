@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  background-color: #e9e7e7;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -29,9 +30,9 @@ code {
 
 .form-actions button,
 .btn {
-  background: #5101d1;
+  background: #353535;
   font: inherit;
-  border: 1px solid #5101d1;
+  border: 1px solid #353535;
   border-radius: 3px;
   padding: 0.25rem 1rem;
   margin-right: 1rem;
@@ -44,8 +45,32 @@ code {
 .form-actions button:active,
 .btn:hover,
 .btn:active {
-  background: #6219d6;
-  border-color: #6219d6;
+  background: #353535;
+  border-color: #353535;
+}
+.btn:disabled,
+.btn:disabled {
+  background: #d61919;
+  border-color: #d61919;
+}
+
+.btn-edit {
+  background: #0dff00;
+  font: inherit;
+  border: 1px solid #0dff00;
+  border-radius: 3px;
+  padding: 0.25rem 1rem;
+  margin-right: 1rem;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.26);
+  color: #353535;
+  cursor: pointer;
+}
+
+.btn-edit:hover,
+.btn-edit:active {
+  color: white;
+  background: #353535;
+  border-color: #353535;
 }
 .dropzone {
   text-align: center;
@@ -55,4 +80,18 @@ code {
   color: #bdbdbd;
 
   margin-bottom: 20px;
+}
+.responsive-image {
+  position: relative;
+  max-width: 100%;
+}
+
+.responsive-image__image {
+  position: relative;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 10%;
+  height: 10%;
 }

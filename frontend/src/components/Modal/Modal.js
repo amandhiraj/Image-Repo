@@ -16,7 +16,7 @@ const modal = props => (
       )}
       {props.canConfirm && (
         <button className="btn" onClick={props.onConfirm}>
-          Confirm
+          Upload
         </button>
       )}
     </section>

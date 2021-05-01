@@ -6,10 +6,24 @@ import AuthContext from '../context/auth-context';
 import './Images.css';
 import Spinner from '../components/Spinner/Spinner';
 
+import moment from "moment";
+
+import axios from 'axios'
+
 import "react-datetime/css/react-datetime.css";
+
 
 import Dropzone from "react-dropzone";
 
+import {
+    Grid,
+    Card,
+    CardContent,
+    Typography,
+    CardHeader,
+    CardMedia,
+    IconButton
+} from '@material-ui/core/'
 
 class ImagePage extends Component {
 
@@ -18,7 +32,9 @@ class ImagePage extends Component {
         images: [],
         isLoading: false,
         selectedImage: null,
-        fileNames: [null]
+        urlOfFile: "",
+        search: null,
+        fileNames: []
     };
 
 
@@ -40,12 +56,126 @@ class ImagePage extends Component {
         this.setState({ creating: true });
     };
 
-    modalConfirmHandler = () => {
+    modalConfirmHandler = async () => {
+        this.uploadToS3(this.titleElRef.current.value, this.priceElRef.current.value, this.dateElRef.current.value);
+    };
+
+    modalCancelHandler = () => {
+        this.setState({ creating: false, selectedImage: null });
+    };
+
+    fetchImages() {
+        this.setState({ isLoading: true });
+        const requestBody = {
+            query: `
+          query {
+            images {
+              _id
+              name
+              description
+              date
+              price
+              creator {
+                _id
+                email
+              }
+            }
+          }
+        `
+        };
+
+        fetch('http://localhost:8080/graphql', {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => {
+                if (res.status !== 200 && res.status !== 201) {
+                    throw new Error('Failed!');
+                }
+                return res.json();
+            })
+            .then(resData => {
+                const images = resData.data.images;
+                this.setState({ images: images });
+                this.setState({ isLoading: false });
+            })
+            .catch(err => {
+                console.log(err);
+                this.setState({ isLoading: false });
+            });
+    }
+
+    showImageHandler = imageId => {
+        this.setState(prevState => {
+            const selectedImage = prevState.images.find(e => e._id === imageId);
+            return { selectedImage: selectedImage };
+        });
+    }
+
+
+    //timage uplaoding to s3
+
+    uploadToS3 = async (title, price, date) => {
+        this.state.fileNames.map(file => {
+            this.postRequestUpload(file, title, price, date);
+        });
+    };
+
+    postRequestUpload = async (file, title, price, dates) => {
+        // Split the filename to get the name and type
+        let fileParts = file.name.split('.');
+
+        let fileName = fileParts[0];
+        let fileType = fileParts[1];
+
+        const date = moment().format("YYYYMMDD");
+        const randomString = Math.random()
+            .toString(36)
+            .substring(2, 7);
+        const newFilename = `rev-${date}-${randomString}-${fileName}`;
+
+        console.log(fileName + " -- " + fileType + "---" + newFilename)
+        console.log("Preparing the upload");
+        axios.post("http://localhost:8080/sign_s3", {
+            fileName: newFilename,
+            fileType: file.type
+        })
+            .then(response => {
+                var returnData = response.data.data.returnData;
+                var signedRequest = returnData.signedRequest;
+                var url = returnData.url;
+                this.setState({ urlOfFile: url })
+                console.log("Recieved a signed request " + url);
+
+                var options = {
+                    headers: {
+                        'Content-Type': fileType,
+                        'Access-Control-Allow-Origin': '*',
+                    }
+                };
+                axios.put(signedRequest, file, options)
+                    .then(result => {
+                        console.log("Response from s3")
+                        this.AddImageToDB(url, title, price, dates);
+                    })
+                    .catch(error => {
+                        alert("ERROR " + JSON.stringify(error));
+                    })
+            })
+            .catch(error => {
+                alert(JSON.stringify(error));
+            })
+    }
+
+    AddImageToDB = async (url, titleValue, priceValue, dateValue) => {
         this.setState({ creating: false });
-        const title = this.titleElRef.current.value;
-        const price = +this.priceElRef.current.value;
-        const date = this.dateElRef.current.value;
-        const description = this.descriptionElRef.current.value;
+        const title = titleValue;
+        const price = priceValue;
+        const date = dateValue;
+        const description = url;
 
         if (
             title.trim().length === 0 ||
@@ -108,93 +238,22 @@ class ImagePage extends Component {
             .catch(err => {
                 console.log(err);
             });
-    };
-
-    modalCancelHandler = () => {
-        this.setState({ creating: false, selectedImage: null });
-    };
-
-    fetchImages() {
-        this.setState({ isLoading: true });
-        const requestBody = {
-            query: `
-          query {
-            images {
-              _id
-              name
-              description
-              date
-              price
-              creator {
-                _id
-                email
-              }
-            }
-          }
-        `
-        };
-
-        fetch('http://localhost:8080/graphql', {
-            method: 'POST',
-            body: JSON.stringify(requestBody),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(res => {
-                if (res.status !== 200 && res.status !== 201) {
-                    throw new Error('Failed!');
-                }
-                return res.json();
-            })
-            .then(resData => {
-                const images = resData.data.images;
-                this.setState({ images: images });
-                this.setState({ isLoading: false });
-            })
-            .catch(err => {
-                console.log(err);
-                this.setState({ isLoading: false });
-            });
     }
 
-    showImageHandler = imageId => {
-        this.setState(prevState => {
-            const selectedImage = prevState.images.find(e => e._id === imageId);
-            return { selectedImage: selectedImage };
-        });
-    }
 
-    handleDrop = acceptedFiles => {
-        const imageNames = acceptedFiles.map(file => {
-            return {filename: file.name, imagePrev: file.path};
+    handleDrop = async files => {
+        const imageNames = files.map(file => {
+            return file;
         });
         this.setState({ fileNames: imageNames })
     }
 
-    render() {
-        const imageList = this.state.images.map(image => {
-            return (
-                <li key={image._id} className="images__list-item">
-                    <div>
-                        <h1>{image.name}</h1>
-                        <h2>
-                            ${image.price} - {new Date(image.date).toLocaleDateString()}
-                        </h2>
-                    </div>
-                    <div>
-                        {this.context.userID === image.creator._id ? (
-                            <p>Your the owner of this event.</p>
-                        ) : (
-                            <button className="btn" onClick={this.showImageHandler.bind(this, image._id)}>
-                                View Details
-                            </button>
-                        )}
-                    </div>
-                </li>
-            );
-        });
+    searchSpace = (event) => {
+        let keyword = event.target.value;
+        this.setState({ search: keyword })
+    }
 
+    render() {
         return (
             <React.Fragment>
                 {(this.state.creating || this.state.selectedImage) && <Backdrop />}
@@ -219,14 +278,6 @@ class ImagePage extends Component {
                                 <label htmlFor="date">Date</label>
                                 <input type="date" id="date" ref={this.dateElRef} />
                             </div>
-                            <div className="form-control">
-                                <label htmlFor="description">Description</label>
-                                <textarea
-                                    id="description"
-                                    rows="4"
-                                    ref={this.descriptionElRef}
-                                />
-                            </div>
                         </form>
                         <label>Image</label>
                         <Dropzone accept="image/*" multiple={true} onDrop={this.handleDrop}>
@@ -237,13 +288,6 @@ class ImagePage extends Component {
                                 </div>
                             )}
                         </Dropzone>
-                        <div>
-                            <ul>
-                                {this.state.fileNames.map(fileName => (
-                                   fileName && <img src={fileName.filename} />)
-                                )}
-                            </ul>
-                        </div>
                     </Modal>
                 )
                 }
@@ -253,7 +297,7 @@ class ImagePage extends Component {
                             <p>Share your own images!</p>
                             <button className="btn" onClick={this.startCreateImageHandler}>
                                 Create Image
-            </button>
+                              </button>
                         </div>
                     )
                 }
@@ -270,9 +314,74 @@ class ImagePage extends Component {
                         </Modal>
                     )
                 }
+
+                <div>
+                    <input type="text" placeholder="Enter image to be searched" style={{
+                        border: 'solid',
+                        left: '18vh',
+                        height: '5vh',
+                        fontSize: 25,
+                        width: '100%',
+                        marginTop: '1vh',
+                        marginBottom: '10vh'
+                    }} onChange={(e) => this.searchSpace(e)} />
+                </div>
+
                 {
                     this.state.isLoading ? (<Spinner />) :
-                        (<ul className="images__list">{imageList}</ul>)
+                        (
+                            <Grid
+                                container
+                                spacing={2}
+                                direction="row"
+                                justify="flex-start"
+                                alignItems="flex-start"
+                            >
+                                { this.state.images.filter((data) => {
+                                    if (this.state.search == null)
+                                        return data
+                                    else if (data.name.toLowerCase().includes(this.state.search.toLowerCase()) || data.description.toLowerCase().includes(this.state.search.toLowerCase())) {
+                                        return data
+                                    }
+                                }).map(elem => (
+                                    <Grid item xs={12} sm={6} md={3} key={this.state.images.indexOf(elem)}>
+
+                                        <Card style={{ display: 'flex' }} >
+                                            <div style={{ display: 'flex', flexDirection: "column" }} >
+                                                <CardContent style={{ flex: "1 0 auto" }}>
+                                                    <Typography component="h5" variant="h5">
+                                                        {elem.name}
+                                                    </Typography>
+                                                    <Typography>
+                                                        ${elem.price}
+                                                    </Typography>
+                                                </CardContent>
+                                                <div >
+                                                    {this.context.userID === elem.creator._id ? (
+                                                        <button className="btn-edit" onClick={this.showImageHandler.bind(this, elem._id)}>
+                                                            Edit
+                                                        </button>
+                                                    ) : (
+                                                        <React.Fragment>
+                                                            <button disabled="true" className="btn">
+                                                                can not edit
+                                                            </button>
+                                                        </React.Fragment>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <CardMedia
+                                                style={{ width: "100%" }}
+                                                image={elem.description}
+                                                title={elem.name}
+                                            />
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+
+
+                        )
                 }
             </React.Fragment >
         );
