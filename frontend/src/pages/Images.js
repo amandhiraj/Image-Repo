@@ -61,7 +61,7 @@ class ImagePage extends Component {
     };
 
     modalCancelHandler = () => {
-        this.setState({ creating: false, selectedImage: null });
+        this.setState({ creating: false, selectedImage: null, fileNames: [] });
     };
 
     fetchImages() {
@@ -241,6 +241,48 @@ class ImagePage extends Component {
     }
 
 
+    deleteImageHandler = imageId => {
+        this.setState({ isLoading: true });
+        const requestBody = {
+            query: `
+              mutation {
+                deleteImage(deleteImageId: "${imageId}") {
+                 _id
+                 name
+                }
+              }
+            `
+        };
+
+        fetch('http://localhost:8080/graphql', {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + this.context.token
+            }
+        })
+            .then(res => {
+                if (res.status !== 200 && res.status !== 201) {
+                    throw new Error('Failed!');
+                }
+                return res.json();
+            })
+            .then(resData => {
+                this.setState(prevState => {
+                    const updateImages = prevState.images.filter(image => {
+                        return image._id !== imageId;
+                    });
+                    this.modalCancelHandler();
+                    return { images: updateImages, isLoading: false };
+
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                this.setState({ isLoading: false });
+            });
+    };
     handleDrop = async files => {
         const imageNames = files.map(file => {
             return file;
@@ -262,6 +304,7 @@ class ImagePage extends Component {
                         title="Add Image"
                         canCancel
                         canConfirm
+                        buttonName="Upload"
                         onCancel={this.modalCancelHandler}
                         onConfirm={this.modalConfirmHandler}
                     >
@@ -288,6 +331,7 @@ class ImagePage extends Component {
                                 </div>
                             )}
                         </Dropzone>
+                        <p>You have selected: {this.state.fileNames.length} files.</p>
                     </Modal>
                 )
                 }
@@ -307,10 +351,11 @@ class ImagePage extends Component {
                             title={this.state.selectedImage.name}
                             canCancel
                             canConfirm
+                            buttonName="Delete"
                             onCancel={this.modalCancelHandler}
-                            onConfirm={this.modalCancelHandler}
+                            onConfirm={this.deleteImageHandler.bind(this, this.state.selectedImage._id)}
                         >
-                            <h1>{this.state.selectedImage.name}</h1>
+                            <h1>⚠️ Are you sure you want to delete this image?</h1>
                         </Modal>
                     )
                 }
@@ -340,7 +385,9 @@ class ImagePage extends Component {
                                 { this.state.images.filter((data) => {
                                     if (this.state.search == null)
                                         return data
-                                    else if (data.name.toLowerCase().includes(this.state.search.toLowerCase()) || data.description.toLowerCase().includes(this.state.search.toLowerCase())) {
+                                    else if (data.name.toLowerCase().includes(this.state.search.toLowerCase())
+                                        || data.description.toLowerCase().includes(this.state.search.toLowerCase())
+                                        || (data.price <= parseFloat(this.state.search) + 1)) {
                                         return data
                                     }
                                 }).map(elem => (
@@ -357,17 +404,24 @@ class ImagePage extends Component {
                                                     </Typography>
                                                 </CardContent>
                                                 <div >
-                                                    {this.context.userID === elem.creator._id ? (
-                                                        <button className="btn-edit" onClick={this.showImageHandler.bind(this, elem._id)}>
-                                                            Edit
-                                                        </button>
-                                                    ) : (
-                                                        <React.Fragment>
-                                                            <button disabled="true" className="btn">
-                                                                can not edit
+                                                    {this.context.token ? (
+
+                                                        this.context.userID === elem.creator._id && this.context.token ? (
+                                                            <button className="btn-edit" onClick={this.showImageHandler.bind(this, elem._id)}>
+                                                                Edit
                                                             </button>
-                                                        </React.Fragment>
+                                                        ) : (
+                                                            <React.Fragment>
+                                                                <button disabled="true" className="btn">
+                                                                    can not edit
+                                                                </button>
+                                                            </React.Fragment>
+                                                        )
+
+                                                    ) : (
+                                                        <p></p>
                                                     )}
+
                                                 </div>
                                             </div>
                                             <CardMedia
