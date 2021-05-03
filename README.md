@@ -57,7 +57,7 @@ The following steps are mandatory for this program to work properly.
         "MaxAgeSeconds": 3000
     }
    ]```
-6. Generate KEYS by going to account -> My security Credentials -> Access Keys -> Create New Access Key -> download the keys for the next step
+6. Generate KEYS by going to account -> My security Credentials -> Access Keys -> Create New Access Key -> download the keys for the next step<br>
 ![image](https://user-images.githubusercontent.com/40723562/116836763-d2338280-ab95-11eb-950b-4ca9ef7d367f.png)![image](https://user-images.githubusercontent.com/40723562/116836815-f727f580-ab95-11eb-8910-7dd90065cb82.png)
 
 
