@@ -3,12 +3,12 @@
 # Setting up Amazon S3
 The following steps are mandatory for this program to work properly. 
 1. Use the following link to make an Amazon S3 account: https://s3.console.aws.amazon.com/<br>
-2. Create Bucket and name it 'shopify-challenge-aman' (make sure it is exactly the same)<br>
+2. Create Bucket and name it <code>shopify-challenge-aman</code> (make sure it is exactly the same)<br>
 ![image](https://user-images.githubusercontent.com/40723562/116836351-36554700-ab94-11eb-92a3-13e73c027c05.png)<br>
     - choose region<br>
     - uncheck "Block all public access"<br>
 
-3.) Setting up Bucket Policy
+3. Setting up Bucket Policy
   Copy + paste the following bucket-policy
   ```json
   {
@@ -61,7 +61,7 @@ The following steps are mandatory for this program to work properly.
 ![image](https://user-images.githubusercontent.com/40723562/116836763-d2338280-ab95-11eb-950b-4ca9ef7d367f.png)![image](https://user-images.githubusercontent.com/40723562/116836815-f727f580-ab95-11eb-8910-7dd90065cb82.png)
 
 
-8. Make a <code>.env</code> file inside the <code>backend folder</code> with the following:
+7. Make a <code>.env</code> file inside the <code>backend folder</code> with the following:
 ```
 AWS_KEY= Enter your Access Key ID
 AWS_S_KEY= Enter You Secret key
