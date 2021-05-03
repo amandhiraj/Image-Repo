@@ -1,13 +1,13 @@
 var aws = require('aws-sdk');
-
+require('dotenv').config()
 
 aws.config.update({
-  region: 'ca-central-1', // Put your aws region here
-  accessKeyId: 'AKIAXQCKFQN3ZCBEQNUB',
-  secretAccessKey: 'iFJQBjYID4JWgNWrdAIRe1HaEmezo9uZgivqk7HK'
+  region: process.env.AWS_REGION, // Put your aws region here
+  accessKeyId: process.env.AWS_KEY,
+  secretAccessKey: process.env.AWS_S_KEY
 })
 
-const S3_BUCKET = 'shopify-challenge-aman'
+const S3_BUCKET = process.env.AWS_BUCKET
 // Now lets export this function so we can call it from somewhere else
 exports.sign_s3 = (req,res) => {
   const s3 = new aws.S3();  // Create a new instance of S3
