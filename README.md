@@ -61,7 +61,7 @@ The following steps are mandatory for this program to work properly.
 ![image](https://user-images.githubusercontent.com/40723562/116836763-d2338280-ab95-11eb-950b-4ca9ef7d367f.png)![image](https://user-images.githubusercontent.com/40723562/116836815-f727f580-ab95-11eb-8910-7dd90065cb82.png)
 
 
-7. Make a <code>.env</code> file inside the <code>backend folder</code> with the following:
+7. Make or Edit the <code>.env</code> file inside the <code>backend folder</code> with the following:
 ```
 AWS_KEY= Enter your Access Key ID
 AWS_S_KEY= Enter You Secret key
