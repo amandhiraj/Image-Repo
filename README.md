@@ -1,6 +1,6 @@
 # ShopifyHereWeGo :) 
 
-# Setting up S3
+# Setting up Amazon S3
 The following steps are mandatory for this program to work properly. 
 1. Use the following link to make an Amazon S3 account: https://s3.console.aws.amazon.com/<br>
 2. Create Bucket and name it 'shopify-challenge-aman' (make sure it is exactly the same)<br>
