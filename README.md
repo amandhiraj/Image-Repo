@@ -1,4 +1,5 @@
-# ShopifyHereWeGo :) 
+# Youtube demo
+[![Aman Dhiraj Shopify Challenge](http://img.youtube.com/vi/0XF7XeBwqzo/0.jpg)](http://www.youtube.com/watch?v=0XF7XeBwqzo "Shopify Challenge")
 
 # Setting up Amazon S3
 The following steps are mandatory for this program to work properly. 
